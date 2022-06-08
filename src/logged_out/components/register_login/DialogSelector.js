@@ -5,11 +5,13 @@ import TermsOfServiceDialog from "./TermsOfServiceDialog";
 import LoginDialog from "./LoginDialog";
 import ChangePasswordDialog from "./ChangePasswordDialog";
 import ModalBackdrop from "../../../shared/components/ModalBackdrop";
+import NewPasswordDiaglog from "./NewPasswordDiaglog";
 
 function DialogSelector(props) {
   const {
     dialogOpen,
     openTermsDialog,
+    openNewPasswordDialog,
     openRegisterDialog,
     openLoginDialog,
     openChangePasswordDialog,
@@ -44,6 +46,7 @@ function DialogSelector(props) {
             status={loginStatus}
             setStatus={setLoginStatus}
             openChangePasswordDialog={openChangePasswordDialog}
+            openNewPasswordDialog={openNewPasswordDialog}
           />
         );
       case "changePassword":
@@ -53,10 +56,19 @@ function DialogSelector(props) {
             onClose={openLoginDialog}
           />
         );
+      case "newPassword":
+        return (
+          <NewPasswordDiaglog
+            onClose={_onClose}
+            status={loginStatus}
+            setStatus={setLoginStatus}
+          />
+        );
       default:
     }
   }, [
     dialogOpen,
+    openNewPasswordDialog,
     openChangePasswordDialog,
     openLoginDialog,
     openRegisterDialog,
@@ -80,6 +92,7 @@ DialogSelector.propTypes = {
   dialogOpen: PropTypes.string,
   openLoginDialog: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
+  openNewPasswordDialog: PropTypes.func.isRequired,
   openTermsDialog: PropTypes.func.isRequired,
   openRegisterDialog: PropTypes.func.isRequired,
   openChangePasswordDialog: PropTypes.func.isRequired,

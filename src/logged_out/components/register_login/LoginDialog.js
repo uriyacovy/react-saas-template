@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, Fragment } from "react";
+import React, { useState, useCallback, useRef, useContext, Fragment } from "react";
 import PropTypes from "prop-types";
 import classNames from "classnames";
 import { withRouter } from "react-router-dom";
@@ -8,8 +8,9 @@ import FormDialog from "../../../shared/components/FormDialog";
 import HighlightedInformation from "../../../shared/components/HighlightedInformation";
 import ButtonCircularProgress from "../../../shared/components/ButtonCircularProgress";
 import VisibilityPasswordTextField from "../../../shared/components/VisibilityPasswordTextField";
+import { AccountContext } from "../../../shared/functions/Account";
 
-const styles = (theme) => ({
+const styles = (theme) => ({  
   forgotPassword: {
     marginTop: theme.spacing(2),
     color: theme.palette.primary.main,
@@ -37,31 +38,83 @@ function LoginDialog(props) {
     classes,
     onClose,
     openChangePasswordDialog,
+    openNewPasswordDialog,
     status,
   } = props;
   const [isLoading, setIsLoading] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const loginEmail = useRef();
   const loginPassword = useRef();
+  const { authenticate } = useContext(AccountContext);
 
   const login = useCallback(() => {
     setIsLoading(true);
     setStatus(null);
-    if (loginEmail.current.value !== "test@web.com") {
-      setTimeout(() => {
+
+
+    authenticate(loginEmail.current.value, loginPassword.current.value)
+      .then(([status, data]) => {
+        console.log(status, data);
+        switch (status) {
+          case "newPasswordRequired":
+            setIsLoading(false);
+            openNewPasswordDialog();
+            break;
+          case "loggedIn":
+            history.push("/c/dashboard");
+            break;
+          default:
+          }
+        })
+      .catch(err => {
+        console.error('Failed to login!', err);
+        setIsLoading(false);
         setStatus("invalidEmail");
-        setIsLoading(false);
-      }, 1500);
-    } else if (loginPassword.current.value !== "HaRzwc") {
-      setTimeout(() => {
-        setStatus("invalidPassword");
-        setIsLoading(false);
-      }, 1500);
-    } else {
-      setTimeout(() => {
-        history.push("/c/dashboard");
-      }, 150);
-    }
+      })
+
+    // const user = new CognitoUser({
+    //   Username: loginEmail.current.value,
+    //   Pool: UserPool
+    // });
+    // const authDetails = new AuthenticationDetails({
+    //   Username: loginEmail.current.value,
+    //   Password: loginPassword.current.value
+    // });
+
+    // user.authenticateUser(authDetails, {
+    //   onSuccess: data => {
+    //     console.log("onSuccess:", data);
+    //     history.push("/c/dashboard");
+    //   },
+
+    //   onFailure: err => {
+    //     console.error("onFailure:", err);
+    //     setIsLoading(false);
+    //     setStatus("invalidEmail");
+    //   },
+
+    //   newPasswordRequired: data => {
+    //     console.log("newPasswordRequired:", data);
+    //     setIsLoading(false);
+    //     openNewPasswordDialog();
+    //   }
+    // });    
+
+    // if (loginEmail.current.value !== "test@web.com") {
+    //   setTimeout(() => {
+    //     setStatus("invalidEmail");
+    //     setIsLoading(false);
+    //   }, 1500);
+    // } else if (loginPassword.current.value !== "HaRzwc") {
+    //   setTimeout(() => {
+    //     setStatus("invalidPassword");
+    //     setIsLoading(false);
+    //   }, 1500);
+    // } else {
+    //   setTimeout(() => {
+    //     history.push("/c/dashboard");
+    //   }, 150);
+    // }
   }, [setIsLoading, loginEmail, loginPassword, history, setStatus]);
 
   return (
@@ -88,7 +141,8 @@ function LoginDialog(props) {
               inputRef={loginEmail}
               autoFocus
               autoComplete="off"
-              type="email"
+              // type="email"
+              type="text"
               onChange={() => {
                 if (status === "invalidEmail") {
                   setStatus(null);
@@ -194,6 +248,7 @@ LoginDialog.propTypes = {
   onClose: PropTypes.func.isRequired,
   setStatus: PropTypes.func.isRequired,
   openChangePasswordDialog: PropTypes.func.isRequired,
+  openNewPasswordDialog: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
   status: PropTypes.string,
 };

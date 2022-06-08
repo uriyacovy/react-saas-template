@@ -51,6 +51,10 @@ function Main(props) {
     setDialogOpen(null);
   }, [setDialogOpen]);
 
+  const openNewPasswordDialog = useCallback(() => {
+    setDialogOpen("newPassword");
+  }, [setDialogOpen]);
+
   const openRegisterDialog = useCallback(() => {
     setDialogOpen("register");
     setIsMobileDrawerOpen(false);
@@ -110,6 +114,7 @@ function Main(props) {
         openLoginDialog={openLoginDialog}
         dialogOpen={dialogOpen}
         onClose={closeDialog}
+        openNewPasswordDialog={openNewPasswordDialog}
         openTermsDialog={openTermsDialog}
         openRegisterDialog={openRegisterDialog}
         openChangePasswordDialog={openChangePasswordDialog}
